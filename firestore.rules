@@ -1,0 +1,41 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ─── Eventos ─────────────────────────────────────────────────────────────
+    match /events/{eventId} {
+
+      // Cualquiera autenticado (incluso anónimo) puede leer eventos públicos
+      allow read: if request.auth != null;
+
+      // Solo usuarios autenticados pueden crear eventos,
+      // y el ownerUid debe coincidir con su uid
+      allow create: if request.auth != null
+                    && request.resource.data.ownerUid == request.auth.uid;
+
+      // Solo el propietario puede actualizar su propio evento
+      allow update: if request.auth != null
+                    && resource.data.ownerUid == request.auth.uid;
+
+      // Solo el propietario puede borrar su evento
+      allow delete: if request.auth != null
+                    && resource.data.ownerUid == request.auth.uid;
+
+      // ─── Subcolección de posiciones ────────────────────────────────────────
+      match /positions/{positionId} {
+
+        // Cualquiera autenticado puede leer posiciones
+        allow read: if request.auth != null;
+
+        // Solo el propietario del evento puede escribir posiciones
+        allow create: if request.auth != null
+                      && get(/databases/$(database)/documents/events/$(eventId)).data.ownerUid
+                         == request.auth.uid;
+
+        // Las posiciones no se modifican ni borran desde el cliente
+        allow update, delete: if false;
+      }
+    }
+  }
+}
