@@ -30,8 +30,11 @@ export interface EventDoc {
 export function useEventSubscription() {
   const [eventData, setEventData] = useState<EventDoc | null>(null);
   const unsubRef = useRef<null | (() => void)>(null);
+  // Guarda el eventId activo para descartar snapshots en vuelo de suscripciones anteriores
+  const currentIdRef = useRef<string | null>(null);
 
   const unsubscribe = useCallback(() => {
+    currentIdRef.current = null;
     if (unsubRef.current) {
       unsubRef.current();
       unsubRef.current = null;
@@ -41,9 +44,12 @@ export function useEventSubscription() {
   const subscribe = useCallback(
     (id: string) => {
       unsubscribe();
+      currentIdRef.current = id;
       unsubRef.current = onSnapshot(
         doc(db, "events", id),
         (snap) => {
+          // Descartar si ya no es el evento activo (snapshot en vuelo de suscripción anterior)
+          if (currentIdRef.current !== id) return;
           if (!snap.exists()) {
             setEventData(null);
             return;
@@ -51,6 +57,7 @@ export function useEventSubscription() {
           setEventData({ id: snap.id, ...(snap.data() as Omit<EventDoc, "id">) });
         },
         (err) => {
+          if (currentIdRef.current !== id) return;
           console.error("[useEventSubscription] onSnapshot error:", err);
           setEventData(null);
         }
