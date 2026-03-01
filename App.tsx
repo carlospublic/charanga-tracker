@@ -31,7 +31,6 @@ function formatAge(tsMs?: number): string {
 export default function App() {
   const [mode, setMode] = useState<Mode>("receiver");
   const [showAbout, setShowAbout] = useState(false);
-  const [isPendingToggle, setIsPendingToggle] = useState(false);
   const insets = useSafeAreaInsets();
   const { height: screenHeight } = useWindowDimensions();
   // Altura del modal: 85% de pantalla menos insets top y bottom para
@@ -215,35 +214,19 @@ export default function App() {
                     placeholder="Ej: Charanga San Mateo"
                     style={styles.input}
                   />
-                  <Pressable style={[styles.btn, !authReady && styles.btnDisabled]} onPress={createEventAndStart} disabled={!authReady}>
+                  <Pressable style={[styles.btn, (!authReady || !emitter.eventName.trim()) && styles.btnDisabled]} onPress={createEventAndStart} disabled={!authReady || !emitter.eventName.trim()}>
                     <Text style={styles.btnText}>{authReady ? "🎺 Crear evento (y emitir)" : "⏳ Conectando..."}</Text>
                   </Pressable>
                 </>
               ) : (
                 <>
                   <Pressable
-                    style={[styles.btn, emitter.isEmitting && styles.btnSecondary, isPendingToggle && styles.btnDisabled]}
-                    disabled={isPendingToggle}
-                    onPress={async () => {
-                      setIsPendingToggle(true);
-                      try {
-                        if (emitter.isEmitting) {
-                          await emitter.stopEmitting(emitter.eventId!);
-                        } else {
-                          await emitter.startEmitting(emitter.eventId!);
-                        }
-                      } finally {
-                        setIsPendingToggle(false);
-                      }
-                    }}
+                    style={[styles.btn, emitter.isEmitting && styles.btnSecondary]}
+                    onPress={emitter.isEmitting
+                      ? () => emitter.stopEmitting(emitter.eventId!)
+                      : () => emitter.startEmitting(emitter.eventId!)}
                   >
-                    <Text style={styles.btnText}>
-                      {isPendingToggle
-                        ? "⏳ Un momento..."
-                        : emitter.isEmitting
-                        ? "⏸ Pausar emisión"
-                        : "▶ Reanudar emisión"}
-                    </Text>
+                    <Text style={styles.btnText}>{emitter.isEmitting ? "⏸ Pausar emisión" : "▶ Reanudar emisión"}</Text>
                   </Pressable>
                   <View style={{ height: 8 }} />
                   <Pressable style={[styles.btn, styles.btnDanger]} onPress={finishEventAndReset}>
@@ -430,7 +413,7 @@ const styles = StyleSheet.create({
   panel: { padding: 12, borderWidth: 1, borderColor: "#FFB3D9", borderRadius: 12, marginBottom: 18 },
 
   label: { fontWeight: "bold" },
-  input: { borderWidth: 1, padding: 8, borderRadius: 12, marginVertical: 8, borderColor: "#FFB3D9", color: "#111", backgroundColor: "#fff" },
+  input: { borderWidth: 1, padding: 8, borderRadius: 12, marginVertical: 8, borderColor: "#FFB3D9" },
 
   btn: { backgroundColor: "#FF3FA4", paddingVertical: 10, paddingHorizontal: 16, borderRadius: 12, alignItems: "center" },
   btnDisabled: { backgroundColor: "#f9a8d4", opacity: 0.6 },

@@ -4,7 +4,7 @@ export default {
   expo: {
     name: "Charanga Tracker",
     slug: "charanga-tracker",
-    version: "1.3.0",
+    version: "1.2.3",
     orientation: "portrait",
     icon: "./assets/icon.png",
     userInterfaceStyle: "light",
@@ -16,7 +16,7 @@ export default {
     splash: {
       image: "./assets/splash-icon.png",
       resizeMode: "contain",
-      backgroundColor: "#ffffff"
+      backgroundColor: "#FF3FA4"
     },
     ios: {
       supportsTablet: true,
@@ -30,10 +30,10 @@ export default {
     },
     android: {
       package: "com.carlos.charangatracker",
-      versionCode: 4,
+      versionCode: 3,
       adaptiveIcon: {
         foregroundImage: "./assets/adaptive-icon.png",
-        backgroundColor: "#ffffff",
+        backgroundColor: "#FF3FA4",
       },
       permissions: [
         "android.permission.ACCESS_COARSE_LOCATION",
