@@ -10,6 +10,7 @@ export function useReceiver(opts: { subscribe: (id: string) => void; unsubscribe
   const [followedEventId, setFollowedEventId] = useState<string | null>(null);
   const [joinStatusMsg, setJoinStatusMsg] = useState<string>("");
   const [nameMatches, setNameMatches] = useState<EventDoc[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
 
   const stopFollowingAndReset = useCallback(() => {
     unsubscribe();
@@ -37,9 +38,10 @@ export function useReceiver(opts: { subscribe: (id: string) => void; unsubscribe
   const connectToEventByName = useCallback(
     async (nameRaw: string) => {
       const name = nameRaw.trim();
-      if (!name) return;
+      if (!name || isSearching) return;
 
       try {
+        setIsSearching(true);
         setJoinStatusMsg("Buscando evento por nombre…");
         setNameMatches([]);
 
@@ -70,9 +72,11 @@ export function useReceiver(opts: { subscribe: (id: string) => void; unsubscribe
       } catch (e) {
         console.error("Error connectToEventByName:", e);
         setJoinStatusMsg("❌ Error buscando por nombre (puede pedir índice).");
+      } finally {
+        setIsSearching(false);
       }
     },
-    [followEvent]
+    [followEvent, isSearching]
   );
 
   return {
@@ -81,6 +85,7 @@ export function useReceiver(opts: { subscribe: (id: string) => void; unsubscribe
     followedEventId,
     joinStatusMsg,
     nameMatches,
+    isSearching,
     setJoinStatusMsg,
     setNameMatches,
     connectToEventByName,
