@@ -25,6 +25,7 @@ export function useNearbyEvents(opts: { ensureForegroundPermission: () => Promis
       const pos = await Location.getCurrentPositionAsync({
         accuracy: Location.Accuracy.High,
         mayShowUserSettingsDialog: true,
+        timeoutMs: 15000,
       });
       const center: [number, number] = [pos.coords.latitude, pos.coords.longitude];
 
