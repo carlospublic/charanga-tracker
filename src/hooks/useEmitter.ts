@@ -18,7 +18,7 @@ export function useEmitter(opts: {
   const { ensureForegroundPermission, ensureBackgroundPermission } = opts;
 
   const [eventId, setEventId] = useState<string | null>(null);
-  const [eventName, setEventName] = useState<string>("Charanga");
+  const [eventName, setEventName] = useState<string>("");
   const [isEmitting, setIsEmitting] = useState(false);
 
   const fgWatchRef = useRef<Location.LocationSubscription | null>(null);
@@ -184,7 +184,7 @@ export function useEmitter(opts: {
         return null;
       }
 
-      const name = (eventName || "Charanga").trim();
+      const name = eventName.trim();
 
       const ref = await addDoc(collection(db, "events"), {
         name,
