@@ -4,7 +4,7 @@ export default {
   expo: {
     name: "Sigue la Charanga",
     slug: "charanga-tracker",
-    version: "1.2.3",
+    version: "1.3.0",
     orientation: "portrait",
     icon: "./assets/icon.png",
     userInterfaceStyle: "light",
@@ -30,7 +30,7 @@ export default {
     },
     android: {
       package: "com.carlos.charangatracker",
-      versionCode: 3,
+      versionCode: 4,
       adaptiveIcon: {
         foregroundImage: "./assets/adaptive-icon.png",
         backgroundColor: "#FF3FA4",
