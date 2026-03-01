@@ -1,4 +1,4 @@
-# 🎺 Charanga Tracker
+# 🎺 Sigue la Charanga
 
 Aplicación móvil en **React Native (Expo)** para seguir en tiempo real la ubicación de una charanga durante fiestas y eventos. Un dispositivo actúa como **emisor** (acompaña a la charanga) y el resto como **receptores**, que visualizan su posición en el mapa en tiempo real.
 
