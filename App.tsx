@@ -137,7 +137,7 @@ export default function App() {
       >
         <View style={styles.container}>
           <View style={styles.header}>
-            <Text style={styles.title}>Charanga Tracker</Text>
+            <Text style={styles.title}>Sigue la Charanga</Text>
             <Pressable onPress={() => setShowAbout(true)} style={styles.infoBtn}>
               <Text style={styles.infoBtnText}>i</Text>
             </Pressable>
@@ -341,11 +341,11 @@ export default function App() {
                 paddingBottom: Math.max(insets.bottom + 24, 80),
               }}
             >
-              <Text style={styles.modalTitle}>🎺 Charanga Tracker</Text>
+              <Text style={styles.modalTitle}>🎺 Sigue la Charanga</Text>
               <Text style={styles.modalVersion}>Versión {APP_VERSION}</Text>
 
               <Text style={styles.modalSection}>¿Qué es esta app?</Text>
-              <Text style={styles.modalText}>Charanga Tracker permite seguir en tiempo real la ubicación de una charanga durante fiestas y eventos. También sirve para cualquier otro tipo de eventos que recorran las calles.</Text>
+              <Text style={styles.modalText}>Sigue la Charanga permite seguir en tiempo real la ubicación de una charanga durante fiestas y eventos. También sirve para cualquier otro tipo de eventos que recorran las calles.</Text>
               <Text style={styles.modalText}>Un dispositivo actúa como emisor (una persona que acompaña a la charanga) y el resto como receptores, que pueden visualizar su posición en el mapa.</Text>
 
               <Text style={styles.modalSection}>📡 Modo Emisor</Text>

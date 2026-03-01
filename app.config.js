@@ -2,7 +2,7 @@ import "dotenv/config";
 
 export default {
   expo: {
-    name: "Charanga Tracker",
+    name: "Sigue la Charanga",
     slug: "charanga-tracker",
     version: "1.2.3",
     orientation: "portrait",

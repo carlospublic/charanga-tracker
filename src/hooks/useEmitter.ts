@@ -18,7 +18,7 @@ export function useEmitter(opts: {
   const { ensureForegroundPermission, ensureBackgroundPermission } = opts;
 
   const [eventId, setEventId] = useState<string | null>(null);
-  const [eventName, setEventName] = useState<string>("");
+  const [eventName, setEventName] = useState<string>("Charanga");
   const [isEmitting, setIsEmitting] = useState(false);
 
   const fgWatchRef = useRef<Location.LocationSubscription | null>(null);
@@ -37,7 +37,7 @@ export function useEmitter(opts: {
       pausesUpdatesAutomatically: false,
       showsBackgroundLocationIndicator: true,
       foregroundService: {
-        notificationTitle: "Charanga Tracker",
+        notificationTitle: "Sigue la Charanga",
         notificationBody: "Emitiendo ubicación en segundo plano",
       },
     }),
@@ -184,7 +184,7 @@ export function useEmitter(opts: {
         return null;
       }
 
-      const name = eventName.trim();
+      const name = (eventName || "Charanga").trim();
 
       const ref = await addDoc(collection(db, "events"), {
         name,
