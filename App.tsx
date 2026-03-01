@@ -99,14 +99,22 @@ export default function App() {
   );
 
   const createEventAndStart = useCallback(async () => {
+    const fgOk = await ensureForegroundPermission();
+    if (!fgOk) {
+      Alert.alert(
+        "Permiso de ubicación necesario",
+        "Para crear un evento necesitas conceder acceso a la ubicación. Ve a Ajustes y activa el permiso."
+      );
+      return;
+    }
     const id = await emitter.createEventAndStart();
     if (!id) {
-      Alert.alert("Error creando evento");
+      Alert.alert("Error creando evento", "Comprueba tu conexión e inténtalo de nuevo.");
       return;
     }
     subscribe(id);
     Alert.alert("Evento creado", `Nombre: ${emitter.eventName.trim()}\nEmisión iniciada`);
-  }, [emitter, subscribe]);
+  }, [emitter, ensureForegroundPermission, subscribe]);
 
   const finishEventAndReset = useCallback(async () => {
     if (!emitter.eventId) return;
