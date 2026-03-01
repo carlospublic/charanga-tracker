@@ -31,7 +31,7 @@ function formatAge(tsMs?: number): string {
 export default function App() {
   const [mode, setMode] = useState<Mode>("receiver");
   const [showAbout, setShowAbout] = useState(false);
-  const [isPendingToggle, setIsPendingToggle] = useState(false);
+  const [pendingAction, setPendingAction] = useState<"pausing" | "resuming" | null>(null);
   const insets = useSafeAreaInsets();
   const { height: screenHeight } = useWindowDimensions();
   // Altura del modal: 85% de pantalla menos insets top y bottom para
@@ -62,9 +62,9 @@ export default function App() {
 
   // Desactiva el estado de espera cuando Firestore confirma el nuevo status
   useEffect(() => {
-    if (isPendingToggle && eventData?.status === "live") setIsPendingToggle(false);
-    if (isPendingToggle && eventData?.status === "paused") setIsPendingToggle(false);
-  }, [eventData?.status, isPendingToggle]);
+    if (pendingAction === "resuming" && eventData?.status === "live") setPendingAction(null);
+    if (pendingAction === "pausing" && eventData?.status === "paused") setPendingAction(null);
+  }, [eventData?.status, pendingAction]);
 
   useEffect(() => {
     return () => {
@@ -228,20 +228,23 @@ export default function App() {
               ) : (
                 <>
                   <Pressable
-                    style={[styles.btn, emitter.isEmitting && styles.btnSecondary, isPendingToggle && styles.btnDisabled]}
-                    disabled={isPendingToggle}
+                    style={[styles.btn, emitter.isEmitting && styles.btnSecondary, pendingAction && styles.btnDisabled]}
+                    disabled={!!pendingAction}
                     onPress={async () => {
-                      setIsPendingToggle(true);
                       if (emitter.isEmitting) {
+                        setPendingAction("pausing");
                         await emitter.stopEmitting(emitter.eventId!);
                       } else {
+                        setPendingAction("resuming");
                         await emitter.startEmitting(emitter.eventId!);
                       }
                     }}
                   >
                     <Text style={styles.btnText}>
-                      {isPendingToggle
-                        ? "⏳ Un momento..."
+                      {pendingAction === "pausing"
+                        ? "⏳ Pausando..."
+                        : pendingAction === "resuming"
+                        ? "⏳ Reanudando..."
                         : emitter.isEmitting
                         ? "⏸ Pausar emisión"
                         : "▶ Reanudar emisión"}
