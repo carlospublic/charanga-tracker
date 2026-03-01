@@ -110,6 +110,7 @@ export default function App() {
 
   const finishEventAndReset = useCallback(async () => {
     if (!emitter.eventId) return;
+    setPendingAction(null);
     try {
       await emitter.finishEventAndReset();
       Alert.alert("Evento finalizado", "Listo para crear un nuevo evento.");
