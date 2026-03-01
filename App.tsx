@@ -38,7 +38,7 @@ export default function App() {
   // que no se salga en ningún dispositivo Android (gesture nav, notch, etc.)
   const modalMaxHeight = screenHeight * 0.85 - insets.top - insets.bottom;
 
-  const { authReady } = useAuthAnonymous();
+  const { authReady, authError } = useAuthAnonymous();
 
   const { ensureForegroundPermission, ensureBackgroundPermission } = useLocationPermission();
   const { eventData, setEventData, subscribe, unsubscribe } = useEventSubscription();
@@ -105,7 +105,7 @@ export default function App() {
       return;
     }
     subscribe(id);
-    Alert.alert("Evento creado", `Nombre: ${(emitter.eventName || "Charanga").trim()}\nEmisión iniciada`);
+    Alert.alert("Evento creado", `Nombre: ${emitter.eventName.trim()}\nEmisión iniciada`);
   }, [emitter, subscribe]);
 
   const finishEventAndReset = useCallback(async () => {
@@ -223,7 +223,7 @@ export default function App() {
                     style={styles.input}
                   />
                   <Pressable style={[styles.btn, (!authReady || !emitter.eventName.trim()) && styles.btnDisabled]} onPress={createEventAndStart} disabled={!authReady || !emitter.eventName.trim()}>
-                    <Text style={styles.btnText}>{authReady ? "🎺 Crear evento (y emitir)" : "⏳ Conectando..."}</Text>
+                    <Text style={styles.btnText}>{authError ? "❌ Sin conexión" : authReady ? "🎺 Crear evento (y emitir)" : "⏳ Conectando..."}</Text>
                   </Pressable>
                 </>
               ) : (
@@ -275,8 +275,8 @@ export default function App() {
                     autoCapitalize="sentences"
                     autoCorrect={false}
                   />
-                  <Pressable style={styles.btn} onPress={() => receiver.connectToEventByName(receiver.joinName)}>
-                    <Text style={styles.btnText}>🔗 Conectar</Text>
+                  <Pressable style={[styles.btn, receiver.isSearching && styles.btnDisabled]} onPress={() => receiver.connectToEventByName(receiver.joinName)} disabled={receiver.isSearching}>
+                    <Text style={styles.btnText}>{receiver.isSearching ? "⏳ Buscando..." : "🔗 Conectar"}</Text>
                   </Pressable>
 
                   {receiver.joinStatusMsg ? <Text style={styles.small}>{receiver.joinStatusMsg}</Text> : null}
@@ -377,7 +377,7 @@ export default function App() {
               <Text style={styles.modalStep}>3. Pulsa <Text style={styles.modalBold}>Crear evento (y emitir)</Text>.</Text>
               <Text style={styles.modalStep}>4. Acepta los permisos de ubicación. Si aceptas "Ubicación siempre", la app emitirá aunque esté en segundo plano.</Text>
               <Text style={styles.modalStep}>5. Cuando termines, pulsa <Text style={styles.modalBold}>Finalizar evento</Text>.</Text>
-              <Text style={styles.modalText}>Los eventos inactivos se eliminan automáticamente cada 60 minutos.</Text>
+              <Text style={styles.modalText}>Los eventos inactivos se marcan como finalizados automáticamente tras 1 hora sin actividad, y se eliminan definitivamente a los 7 días.</Text>
 
               <Text style={styles.modalSection}>🗺️ Modo Receptor</Text>
               <Text style={styles.modalStep}>1. Selecciona la pestaña <Text style={styles.modalBold}>Receptor</Text>.</Text>
@@ -450,4 +450,5 @@ const styles = StyleSheet.create({
   separator: { height: 1, backgroundColor: "#FFB3D9", marginVertical: 14 },
   nearRow: { flexDirection: "row", alignItems: "center", paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: "#FFB3D9" },
   joinPill: { backgroundColor: "#FF3FA4", paddingHorizontal: 12, paddingVertical: 8, borderRadius: 999 },
+  joinPillDisabled: { backgroundColor: "#9ca3af" },
 });
