@@ -53,3 +53,20 @@ export async function getSessionStartedAt(): Promise<number | null> {
   const raw = await AsyncStorage.getItem(STORAGE_KEY_SESSION_STARTED_AT);
   return raw ? parseInt(raw, 10) : null;
 }
+
+// ─── Cleanup al arrancar ──────────────────────────────────────────────────────
+// Limpia todo el estado de emisión en AsyncStorage. Se llama al arrancar la app
+// para evitar que un estado sucio de una sesión anterior bloquee la creación
+// de nuevos eventos (por ejemplo, si la app se cerró durante una operación pendiente).
+export async function clearAllEmissionState(): Promise<void> {
+  try {
+    await AsyncStorage.multiRemove([
+      STORAGE_KEY_EVENT_ID,
+      STORAGE_KEY_LAST_SAVED,
+      STORAGE_KEY_SESSION_ID,
+      STORAGE_KEY_SESSION_STARTED_AT,
+    ]);
+  } catch {
+    // ignorar
+  }
+}

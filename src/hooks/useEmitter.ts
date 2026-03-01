@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState, useEffect } from "react";
 import type { MutableRefObject } from "react";
 import { Alert } from "react-native";
 import * as Location from "expo-location";
@@ -7,7 +7,7 @@ import { addDoc, collection, doc, serverTimestamp, updateDoc } from "firebase/fi
 import { db, auth } from "../firebase";
 
 import { BG_LOCATION_TASK } from "../background/constants";
-import { clearEmittingEventId, setEmittingEventId, setEmitSessionId, clearEmitSessionId } from "../background/emissionStore";
+import { clearEmittingEventId, setEmittingEventId, setEmitSessionId, clearEmitSessionId, clearAllEmissionState } from "../background/emissionStore";
 import { APP_VERSION } from "../version";
 import { savePositionPoint, type SavedPoint } from "../location/savePositionPoint";
 
@@ -20,6 +20,13 @@ export function useEmitter(opts: {
   const [eventId, setEventId] = useState<string | null>(null);
   const [eventName, setEventName] = useState<string>("");
   const [isEmitting, setIsEmitting] = useState(false);
+
+  // Limpiar estado de emisión en AsyncStorage al arrancar la app.
+  // Evita que un estado sucio de una sesión anterior (cierre inesperado,
+  // finalizar durante operación pendiente) bloquee la creación de nuevos eventos.
+  useEffect(() => {
+    clearAllEmissionState();
+  }, []);
 
   const fgWatchRef = useRef<Location.LocationSubscription | null>(null);
   // En FG guardamos lastSaved en un ref (no necesita persistencia en AsyncStorage)
