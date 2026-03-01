@@ -1,5 +1,4 @@
 import { useCallback, useMemo, useRef, useState, useEffect } from "react";
-import type { MutableRefObject } from "react";
 import { Alert } from "react-native";
 import * as Location from "expo-location";
 import * as Device from "expo-device";
