@@ -122,7 +122,7 @@ eas secret:list
 1. Selecciona la pestaña **Emisor**
 2. Escribe un nombre para el evento (p. ej. `Charanga San Mateo`)
 3. Pulsa **🎺 Crear evento (y emitir)**
-4. Acepta los permisos de ubicación — si aceptas *"Ubicación siempre"*, la app emitirá aunque la pantalla esté bloqueada
+4. Acepta los permisos de ubicación — si aceptas *"Ubicación siempre"*, la app emitirá aunque la pantalla esté bloqueada. **Evita "Solo una vez"**: ese permiso expira al salir de la app y bloqueará la creación del evento en la siguiente sesión
 5. Usa **⏸ Pausar emisión** / **▶ Reanudar emisión** para controlar la emisión sin finalizar el evento
 6. Cuando termines, pulsa **🏁 Finalizar evento**
 
@@ -206,6 +206,7 @@ Resultado: **~4 escrituras/min** máximo por evento activo (frente a ~12 sin thr
 - **`emitSessionId`**: ID único por sesión generado al hacer Start. El BG task compara el sessionId al inicio y al final de cada callback — si cambió (Stop+Start rápido), descarta el write
 - **`sessionStartedAt`**: timestamp de inicio de sesión. El BG task descarta localizaciones con timestamp anterior al inicio, evitando que el SO entregue puntos en caché de una sesión anterior
 - Ambos mecanismos juntos hacen el sistema **a prueba de condiciones de carrera**
+- **`currentIdRef` en `useEventSubscription`**: snapshots en vuelo de suscripciones anteriores son descartados si el eventId ya no coincide con el activo, evitando sobreescrituras de estado al cambiar de evento rápidamente
 
 ### Polyline y historial
 
