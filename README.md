@@ -13,6 +13,8 @@ Diseñada para funcionar de forma fiable durante eventos de hasta 4 horas, con e
 - 🧭 **Buscar eventos cercanos** — detecta eventos activos en un radio de 3 km usando geohash
 - 🔍 **Buscar por nombre** — conéctate a un evento concreto escribiendo su nombre exacto
 - ⏸️ **Pausar / reanudar** — el emisor puede pausar la emisión sin finalizar el evento
+- 🎯 **Seguimiento automático del mapa** — el mapa sigue al marcador de la charanga, con botón para recentrar si el usuario lo ha movido manualmente
+- 🔒 **Control de versión mínima** — versiones obsoletas se bloquean con pantalla de actualización, configurable en tiempo real desde Firestore
 - 🔥 **Firebase Firestore** — sincronización en tiempo real entre dispositivos
 - 🔐 **Autenticación anónima** — sin registro, acceso inmediato al abrir la app
 - 🛡️ **Firestore Security Rules** — solo el propietario puede modificar su evento
@@ -129,17 +131,18 @@ eas secret:list
 ### Modo Receptor
 1. Selecciona la pestaña **Receptor**
 2. Escribe el nombre exacto del evento y pulsa **Conectar**, o usa **🧭 Buscar eventos cercanos** para ver los activos en un radio de 3 km
-3. Si hay varios eventos con el mismo nombre, aparecerá una lista para elegir
+3. Si hay varios eventos con el mismo nombre, aparecerá una lista para elegir. Solo se muestran eventos activos (`live` o `paused`) — los finalizados se filtran aunque hubiera un resultado en caché
 4. Una vez conectado, verás la posición de la charanga en el mapa y el rastro del recorrido
-5. El punto azul indica tu propia posición
-6. Para dejar de seguir, pulsa **✋ Dejar de seguir**
+5. El mapa sigue automáticamente al marcador. Si lo mueves manualmente, aparece el botón **🎯 Recentrar** para volver a centrarlo
+6. El punto azul indica tu propia posición
+7. Para dejar de seguir, pulsa **✋ Dejar de seguir**
 
 ---
 
 ## 📁 Estructura del proyecto
 
 ```
-├── App.tsx                        # Componente principal, UI y navegación de modos
+├── App.tsx                        # Componente raíz: orquesta hooks y renderiza los paneles
 ├── index.tsx                      # Punto de entrada
 ├── app.config.js                  # Configuración Expo — lee variables de entorno
 ├── eas.json                       # Perfiles de build (development, preview, production)
@@ -153,14 +156,21 @@ eas secret:list
 │   │   ├── constants.ts           # Claves AsyncStorage y nombre de tarea BG
 │   │   ├── emissionStore.ts       # Estado persistente de emisión (eventId, sessionId, sessionStartedAt)
 │   │   └── locationTask.ts        # Tarea GPS en segundo plano con validación de sesión
+│   ├── components/
+│   │   ├── AboutModal.tsx         # Modal de información y créditos
+│   │   ├── EmitterPanel.tsx       # Panel de crear / pausar / finalizar evento
+│   │   ├── EventMap.tsx           # Mapa con marcador, polyline y botón recentrar
+│   │   ├── ReceiverPanel.tsx      # Panel de búsqueda y seguimiento de evento
+│   │   └── UpdateRequired.tsx     # Pantalla de bloqueo por versión obsoleta
 │   ├── hooks/
 │   │   ├── useAuthAnonymous.ts    # Login anónimo + estado authReady
+│   │   ├── useEventPositions.ts   # Listener del historial de posiciones (últimos 300 pts)
+│   │   ├── useEventSubscription.ts# Listener en tiempo real del documento de evento
+│   │   ├── useEmitter.ts          # Lógica completa de creación y emisión
 │   │   ├── useLocationPermission.ts  # Gestión de permisos FG/BG con caché
-│   │   ├── useEventSubscription.ts   # Listener en tiempo real del documento de evento
-│   │   ├── useEmitter.ts             # Lógica completa de creación y emisión
-│   │   ├── useReceiver.ts            # Búsqueda por nombre y seguimiento de evento
-│   │   ├── useNearbyEvents.ts        # Búsqueda por geohash en radio de 3 km
-│   │   └── useEventPositions.ts      # Listener del historial de posiciones (últimos 300 pts)
+│   │   ├── useMinVersion.ts       # Comprueba versión mínima requerida contra Firestore
+│   │   ├── useNearbyEvents.ts     # Búsqueda por geohash en radio de 3 km
+│   │   └── useReceiver.ts         # Búsqueda por nombre y seguimiento de evento
 │   └── location/
 │       └── savePositionPoint.ts   # Lógica compartida BG/FG: throttle, filtros y escritura GPS
 ```
@@ -171,6 +181,8 @@ eas secret:list
 
 El proyecto incluye `firestore.rules` con las siguientes protecciones:
 
+- **Leer** `config/app`: cualquiera (incluido no autenticado) — necesario para la comprobación de versión mínima antes del login
+- **Escribir** `config/app`: bloqueado desde el cliente — solo desde la consola de Firebase
 - **Leer** eventos y posiciones: cualquier usuario autenticado (anónimo incluido)
 - **Crear** evento: usuario autenticado, con `ownerUid` igual a su propio UID
 - **Actualizar / borrar** evento: solo el propietario del evento
@@ -180,6 +192,34 @@ El proyecto incluye `firestore.rules` con las siguientes protecciones:
 Para aplicar las rules, copia el contenido de `firestore.rules` en **Firebase Console → Firestore → Rules**.
 
 > El `ownerUid` se asigna automáticamente al crear el evento usando el UID del usuario anónimo. Esto garantiza que cada evento solo puede ser modificado desde el dispositivo que lo creó.
+
+---
+
+## 🔄 Control de versión mínima
+
+La app comprueba al arrancar si su versión es suficiente leyendo el documento `config/app` de Firestore. Si no lo es, muestra una pantalla de bloqueo con un enlace a las stores.
+
+### Configurar la versión mínima
+
+Crea o edita el documento en **Firebase Console → Firestore → config → app**:
+
+```
+Campo: minVersion (string)
+Valor: "1.3.0"   ← versión más antigua permitida
+```
+
+Para bloquear versiones antiguas en caso de un bug crítico, basta con subir ese valor desde la consola — sin publicar nada. El efecto es inmediato para todos los usuarios.
+
+**Comportamiento por casos:**
+
+| Situación | Resultado |
+|---|---|
+| `APP_VERSION >= minVersion` | App funciona con normalidad |
+| `APP_VERSION < minVersion` | Pantalla de bloqueo con enlace a la store |
+| Documento `config/app` no existe | Se deja pasar (entorno de desarrollo sin configurar) |
+| Error de red al leer `config/app` | Se deja pasar (mejor experiencia degradada que bloquear por conectividad) |
+
+> Recuerda actualizar las URLs de las stores en `src/components/UpdateRequired.tsx` antes de publicar la app.
 
 ---
 
@@ -206,13 +246,19 @@ Resultado: **~4 escrituras/min** máximo por evento activo (frente a ~12 sin thr
 - **`emitSessionId`**: ID único por sesión generado al hacer Start. El BG task compara el sessionId al inicio y al final de cada callback — si cambió (Stop+Start rápido), descarta el write
 - **`sessionStartedAt`**: timestamp de inicio de sesión. El BG task descarta localizaciones con timestamp anterior al inicio, evitando que el SO entregue puntos en caché de una sesión anterior
 - Ambos mecanismos juntos hacen el sistema **a prueba de condiciones de carrera**
-- **`currentIdRef` en `useEventSubscription`**: snapshots en vuelo de suscripciones anteriores son descartados si el eventId ya no coincide con el activo, evitando sobreescrituras de estado al cambiar de evento rápidamente
+- **`currentIdRef` en `useEventSubscription`**: snapshots en vuelo de suscripciones anteriores son descartados si el eventId ya no coincide con el activo
 
-### Polyline y historial
+### Polyline e historial de posiciones
 
 - El listener carga los **últimos 300 puntos** para pintar el rastro visual (~75 min a cadencia de 15s)
+- La query usa `orderBy("ts", "desc") + limit(300)` para obtener siempre los puntos más recientes. Los puntos se re-ordenan a ascendente en cliente para dibujar la polyline cronológicamente. **No cambiar el `orderBy` a `asc`**: con `limit`, eso devolvería los puntos más antiguos en lugar de los más recientes, rompiendo el rastro visible de forma silenciosa
 - El **historial completo** se conserva en Firestore sin límite — disponible para consulta futura
-- Los puntos se ordenan por `ts` ascendente en cliente para dibujar la polyline correctamente
+
+### Seguimiento del mapa
+
+- El mapa usa `initialRegion` (no `region`) para no competir con los gestos del usuario
+- Cada vez que llega una nueva posición, `animateToRegion` centra el mapa suavemente — salvo que el usuario lo haya movido manualmente
+- `onRegionChangeComplete` detecta gestos del usuario y activa el botón **🎯 Recentrar**, que vuelve a centrar el mapa y reactiva el seguimiento automático
 
 ### Android — builds de producción
 
