@@ -28,6 +28,11 @@ export function useEventPositions(eventId: string | null, maxPoints: number = 50
 
     if (!eventId) return;
 
+    // IMPORTANTE: orderBy("ts", "desc") + limit(maxPoints) para quedarnos
+    // con los maxPoints puntos MÁS RECIENTES (Firestore no tiene "last N").
+    // Los puntos se re-ordenan a asc en el callback para pintar la polyline
+    // en orden cronológico. NO cambiar a "asc" aquí: limit cogería los más
+    // antiguos y el rastro visible quedaría roto silenciosamente.
     const q = query(
       collection(db, "events", eventId, "positions"),
       orderBy("ts", "desc"),
