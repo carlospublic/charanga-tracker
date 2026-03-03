@@ -56,12 +56,17 @@ export function useReceiver(opts: { subscribe: (id: string) => void; unsubscribe
 
         const qs = await getDocs(q);
 
-        if (qs.empty) {
+        if (matches.length === 0) {
           setJoinStatusMsg("❌ No hay ningún evento live o pausado con ese nombre.");
           return;
         }
 
-        const matches = qs.docs.map((d) => ({ id: d.id, ...d.data() } as EventDoc));
+        // Filtramos "ended" por si el evento cambió de estado justo entre
+        // el momento de la query y el render — la query ya excluye ended,
+        // pero un snapshot en vuelo podría colarse con datos obsoletos.
+        const matches = qs.docs
+          .map((d) => ({ id: d.id, ...d.data() } as EventDoc))
+          .filter((e) => e.status !== "ended");
         setNameMatches(matches);
 
         if (matches.length === 1) {
