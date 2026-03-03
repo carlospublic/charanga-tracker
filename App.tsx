@@ -35,7 +35,7 @@ export default function App() {
   const [pendingAction, setPendingAction] = useState<"pausing" | "resuming" | null>(null);
 
   const { status: versionStatus, minVersion } = useMinVersion();
-  const { authReady, authError } = useAuthAnonymous();
+  const { authReady, authError, retryAuth } = useAuthAnonymous();
   const { ensureForegroundPermission, ensureBackgroundPermission } = useLocationPermission();
   const { eventData, setEventData, subscribe, unsubscribe } = useEventSubscription();
 
@@ -224,6 +224,7 @@ export default function App() {
               onCreateEventAndStart={createEventAndStart}
               onToggleEmitting={handleToggleEmitting}
               onFinishEvent={finishEventAndReset}
+              onRetryAuth={retryAuth}
             />
           ) : (
             <ReceiverPanel

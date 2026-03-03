@@ -2,7 +2,7 @@ import { View, Text, TextInput, Pressable, StyleSheet } from "react-native";
 
 interface Props {
   authReady: boolean;
-  authError: string | null;
+  authError: boolean;
   eventId: string | null;
   eventName: string;
   isEmitting: boolean;
@@ -11,6 +11,7 @@ interface Props {
   onCreateEventAndStart: () => void;
   onToggleEmitting: () => void;
   onFinishEvent: () => void;
+  onRetryAuth: () => void;
 }
 
 export function EmitterPanel({
@@ -24,6 +25,7 @@ export function EmitterPanel({
   onCreateEventAndStart,
   onToggleEmitting,
   onFinishEvent,
+  onRetryAuth,
 }: Props) {
   return (
     <View style={styles.panel}>
@@ -45,6 +47,15 @@ export function EmitterPanel({
               {authError ? "❌ Sin conexión" : authReady ? "🎺 Crear evento (y emitir)" : "⏳ Conectando..."}
             </Text>
           </Pressable>
+
+          {authError && (
+            <>
+              <View style={{ height: 8 }} />
+              <Pressable style={[styles.btn, styles.btnSecondary]} onPress={onRetryAuth}>
+                <Text style={styles.btnText}>🔄 Reintentar conexión</Text>
+              </Pressable>
+            </>
+          )}
         </>
       ) : (
         <>

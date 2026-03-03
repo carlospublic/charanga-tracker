@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { onAuthStateChanged, signInAnonymously } from "firebase/auth";
 import { auth } from "../firebase";
 
@@ -6,20 +6,25 @@ export function useAuthAnonymous() {
   const [authReady, setAuthReady] = useState(false);
   const [authError, setAuthError] = useState(false);
 
+  const trySignIn = useCallback(() => {
+    setAuthError(false);
+    signInAnonymously(auth).catch((e) => {
+      console.error("[useAuthAnonymous] signInAnonymously failed:", e);
+      setAuthError(true);
+    });
+  }, []);
+
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, (user) => {
       if (user) {
         setAuthReady(true);
         setAuthError(false);
       } else {
-        signInAnonymously(auth).catch((e) => {
-          console.error("[useAuthAnonymous] signInAnonymously failed:", e);
-          setAuthError(true);
-        });
+        trySignIn();
       }
     });
     return unsub;
-  }, []);
+  }, [trySignIn]);
 
-  return { authReady, authError };
+  return { authReady, authError, retryAuth: trySignIn };
 }
