@@ -15,7 +15,8 @@ import { AboutModal } from "./src/components/AboutModal";
 import { EventMap } from "./src/components/EventMap";
 import { EmitterPanel } from "./src/components/EmitterPanel";
 import { ReceiverPanel } from "./src/components/ReceiverPanel";
-
+import { UpdateRequired } from "./src/components/UpdateRequired";
+import { useMinVersion } from "./src/hooks/useMinVersion";
 
 function formatAge(tsMs?: number): string {
   if (!tsMs) return "—";
@@ -33,6 +34,7 @@ export default function App() {
   const [showAbout, setShowAbout] = useState(false);
   const [pendingAction, setPendingAction] = useState<"pausing" | "resuming" | null>(null);
 
+  const { status: versionStatus, minVersion } = useMinVersion();
   const { authReady, authError } = useAuthAnonymous();
   const { ensureForegroundPermission, ensureBackgroundPermission } = useLocationPermission();
   const { eventData, setEventData, subscribe, unsubscribe } = useEventSubscription();
@@ -138,6 +140,9 @@ export default function App() {
     nearby.setNearby([]);
     nearby.setNearbyMsg("");
   }, [nearby, receiver, setEventData]);
+
+  // Bloquear UI si la versión es insuficiente o mostrar spinner mientras se comprueba
+  if (versionStatus === "outdated") return <UpdateRequired minVersion={minVersion} />;
 
   const lastLoc = eventData?.lastLocation;
   const lastTsMs = lastLoc?.ts;
