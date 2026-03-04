@@ -90,7 +90,7 @@ export function ReceiverPanel({
                 <View style={styles.nearRow}>
                   <View style={{ flex: 1 }}>
                     <Text style={{ fontWeight: "700" }}>{item.name ?? "Evento"}</Text>
-                    <Text style={{ opacity: 0.75, fontSize: 12 }}>
+                    <Text style={{ opacity: 0.75, fontSize: 12, color: "#111" }}>
                       estado: {item.status ?? "live"} · actualizado hace {formatAge(ts)}
                     </Text>
                   </View>
@@ -125,7 +125,7 @@ export function ReceiverPanel({
               <View style={styles.nearRow}>
                 <View style={{ flex: 1 }}>
                   <Text style={{ fontWeight: "700" }}>{item.name ?? "Evento"}</Text>
-                  <Text style={{ opacity: 0.75, fontSize: 12 }}>
+                  <Text style={{ opacity: 0.75, fontSize: 12, color: "#111" }}>
                     {item.distanceKm?.toFixed(2)} km · {item.status}
                   </Text>
                 </View>
@@ -148,13 +148,13 @@ export function ReceiverPanel({
 
 const styles = StyleSheet.create({
   panel: { padding: 12, borderWidth: 1, borderColor: "#FFB3D9", borderRadius: 12, marginBottom: 18 },
-  label: { fontWeight: "bold" },
+  label: { fontWeight: "bold", color: "#111" },
   input: { borderWidth: 1, padding: 8, borderRadius: 12, marginVertical: 8, borderColor: "#FFB3D9", color: "#111", backgroundColor: "#fff" },
   btn: { backgroundColor: "#FF3FA4", paddingVertical: 10, paddingHorizontal: 16, borderRadius: 12, alignItems: "center" },
   btnDisabled: { backgroundColor: "#f9a8d4", opacity: 0.6 },
   btnDanger: { backgroundColor: "#dc2626" },
   btnText: { color: "white", fontWeight: "700" },
-  small: { marginTop: 6, fontSize: 12, opacity: 0.78 },
+  small: { marginTop: 6, fontSize: 12, opacity: 0.78, color: "#111" },
   separator: { height: 1, backgroundColor: "#FFB3D9", marginVertical: 14 },
   nearRow: { flexDirection: "row", alignItems: "center", paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: "#FFB3D9" },
   joinPill: { backgroundColor: "#FF3FA4", paddingHorizontal: 12, paddingVertical: 8, borderRadius: 999 },

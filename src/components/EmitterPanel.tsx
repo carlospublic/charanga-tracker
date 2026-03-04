@@ -86,7 +86,7 @@ export function EmitterPanel({
 
 const styles = StyleSheet.create({
   panel: { padding: 12, borderWidth: 1, borderColor: "#FFB3D9", borderRadius: 12, marginBottom: 18 },
-  label: { fontWeight: "bold" },
+  label: { fontWeight: "bold", color: "#111" },
   input: { borderWidth: 1, padding: 8, borderRadius: 12, marginVertical: 8, borderColor: "#FFB3D9", color: "#111", backgroundColor: "#fff" },
   btn: { backgroundColor: "#FF3FA4", paddingVertical: 10, paddingHorizontal: 16, borderRadius: 12, alignItems: "center" },
   btnDisabled: { backgroundColor: "#f9a8d4", opacity: 0.6 },

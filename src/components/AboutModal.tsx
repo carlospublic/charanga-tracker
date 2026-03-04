@@ -76,7 +76,7 @@ const styles = StyleSheet.create({
   modalSection: { fontSize: 15, fontWeight: "700", marginTop: 16, marginBottom: 6, color: "#FF3FA4" },
   modalText: { fontSize: 14, lineHeight: 22, opacity: 0.85, marginBottom: 6, color: "#111" },
   modalStep: { fontSize: 14, lineHeight: 22, opacity: 0.85, marginBottom: 6, color: "#111" },
-  modalBold: { fontWeight: "700" },
+  modalBold: { fontWeight: "700", color: "#111" },
   modalClose: { backgroundColor: "#FF3FA4", borderRadius: 10, paddingVertical: 12, alignItems: "center", marginTop: 20 },
   modalCloseText: { color: "white", fontWeight: "700", fontSize: 15 },
 });

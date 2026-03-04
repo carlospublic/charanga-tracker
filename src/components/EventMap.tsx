@@ -92,7 +92,7 @@ export function EventMap({ mode, lastLoc, isWaitingForGps, polyCoords, eventData
               </Text>
             </>
           ) : (
-            <Text style={{ opacity: 0.7, textAlign: "center" }}>
+            <Text style={{ opacity: 0.7, textAlign: "center", color: "#111" }}>
               {mode === "receiver"
                 ? "Únete a un evento o busca eventos cercanos."
                 : "Crea un evento: empezará a emitir automáticamente."}
@@ -107,7 +107,7 @@ export function EventMap({ mode, lastLoc, isWaitingForGps, polyCoords, eventData
 const styles = StyleSheet.create({
   mapContainer: { flex: 1, borderRadius: 12, overflow: "hidden", borderWidth: 1, borderColor: "#FFB3D9" },
   mapPlaceholder: { flex: 1, justifyContent: "center", alignItems: "center", padding: 10 },
-  small: { fontSize: 12, opacity: 0.78 },
+  small: { fontSize: 12, opacity: 0.78, color: "#111" },
   recenterBtn: {
     position: "absolute",
     bottom: 12,
