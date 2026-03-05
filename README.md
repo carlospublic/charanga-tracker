@@ -227,7 +227,7 @@ Para bloquear versiones antiguas en caso de un bug crítico, basta con subir ese
 
 ### Throttle de escrituras GPS
 
-La cadencia está ajustada para el ritmo de una charanga a pie (~4-5 km/h):
+La cadencia está optimizada para minimizar escrituras manteniendo precisión tanto a pie como en vehículo:
 
 | Parámetro | Valor | Descripción |
 |---|---|---|
@@ -235,7 +235,7 @@ La cadencia está ajustada para el ritmo de una charanga a pie (~4-5 km/h):
 | `MIN_MS` | 15s | Cadencia mínima entre puntos del historial |
 | `MIN_KM` | 10m | Desplazamiento mínimo para guardar punto |
 | `MAX_ACCURACY_M` | 50m | Precisión mínima aceptable para el historial |
-| `JUMP_KM` | 200m | Umbral anti-salto (en menos de 5s) |
+| `MAX_SPEED_KMH` | 200 km/h | Velocidad máxima considerada real — descarta saltos GPS erróneos |
 
 Resultado: **~4 escrituras/min** máximo por evento activo (frente a ~12 sin throttle).
 
@@ -260,10 +260,20 @@ Resultado: **~4 escrituras/min** máximo por evento activo (frente a ~12 sin thr
 - Cada vez que llega una nueva posición, `animateToRegion` centra el mapa suavemente — salvo que el usuario lo haya movido manualmente
 - `onRegionChangeComplete` detecta gestos del usuario y activa el botón **🎯 Recentrar**, que vuelve a centrar el mapa y reactiva el seguimiento automático
 
+### Reintento de autenticación
+
+- Si Firebase Auth falla al arrancar (sin red), el modo Emisor muestra el botón **🔄 Reintentar conexión** en lugar de quedar bloqueado indefinidamente
+- El reintento es manual: el usuario pulsa el botón cuando recupera la conexión
+
 ### Android — builds de producción
 
 - `StatusBar` explícito con `translucent={false}` para garantizar visibilidad de la barra de estado nativa
 - Altura del modal calculada con `useWindowDimensions` para scroll correcto en todos los dispositivos y versiones de Android
+
+### Compatibilidad con tema oscuro
+
+- Todos los estilos de texto tienen `color: "#111"` explícito para evitar que hereden el color del tema del sistema
+- Sin esto, en dispositivos con tema oscuro activado el texto blanco sería invisible sobre el fondo blanco de la app
 
 ### Costes Firestore estimados
 
