@@ -4,7 +4,7 @@ export default {
   expo: {
     name: "Sigue la Charanga",
     slug: "charanga-tracker",
-    version: "1.3.1",
+    version: "1.3.2",
     orientation: "portrait",
     icon: "./assets/icon.png",
     userInterfaceStyle: "light",

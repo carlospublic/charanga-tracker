@@ -35,8 +35,8 @@ export function AboutModal({ visible, onClose }: Props) {
             <Text style={styles.modalVersion}>Versión {APP_VERSION}</Text>
 
             <Text style={styles.modalSection}>¿Qué es esta app?</Text>
-            <Text style={styles.modalText}>Sigue la Charanga permite seguir en tiempo real la ubicación de una charanga durante las fiestas. También sirve para cualquier otro tipo de eventos que recorran las calles.</Text>
-            <Text style={styles.modalText}>Un dispositivo actúa como emisor (una persona que acompaña a la charanga) y el resto como receptores, que pueden visualizar su posición en el mapa.</Text>
+           <Text style={styles.modalText}>Sigue la Charanga permite conocer en tiempo real la ubicación de una charanga durante las fiestas. También puede utilizarse para cualquier otro tipo de evento que recorra las calles.</Text>
+          <Text style={styles.modalText}>Un dispositivo que acompaña a la charanga actúa como emisor y comparte la ubicación del evento. El resto de dispositivos actúan como receptores y pueden visualizar su posición en el mapa.</Text>
 
             <Text style={styles.modalSection}>📡 Modo Emisor</Text>
             <Text style={styles.modalStep}>1. Selecciona la pestaña <Text style={styles.modalBold}>Emisor</Text>.</Text>
