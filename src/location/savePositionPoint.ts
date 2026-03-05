@@ -5,8 +5,8 @@
  * Actualiza lastLocation siempre, y guarda en el historial de posiciones
  * aplicando los mismos filtros en ambos contextos:
  *   - Precisión > 50m → descarta del historial (lastLocation se actualiza siempre)
- *   - Salto imposible (>200m en <5s) → descarta del historial
- *   - Cadencia mínima (8s o 10m) → evita puntos redundantes
+ *   - Salto imposible (>200 km/h entre el punto anterior y el nuevo) → descarta del historial
+ *   - Cadencia mínima (15s o 10m) → evita puntos redundantes
  */
 
 import { addDoc, collection, doc, serverTimestamp, updateDoc } from "firebase/firestore";
@@ -14,11 +14,11 @@ import { geohashForLocation, distanceBetween } from "geofire-common";
 import { db } from "../firebase";
 
 // ─── Constantes ───────────────────────────────────────────────────────────────
-export const MAX_ACCURACY_M = 50;   // precisión mínima aceptable para el historial
-export const MIN_MS        = 15_000; // cadencia mínima entre puntos del historial (15s)
-export const MIN_KM        = 0.01;  // o 10m de desplazamiento mínimo
-export const JUMP_MS       = 5_000; // umbral de tiempo para filtro anti-salto
-export const JUMP_KM       = 0.2;   // umbral de distancia para filtro anti-salto (200m)
+export const MAX_ACCURACY_M  = 50;     // precisión mínima aceptable para el historial
+export const MIN_MS          = 15_000; // cadencia mínima entre puntos del historial (15s)
+export const MIN_KM          = 0.01;   // o 10m de desplazamiento mínimo
+export const MAX_SPEED_KMH   = 200;    // velocidad máxima considerada real (km/h)
+                                       // cubre coches, motos y autobuses; descarta saltos GPS
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
 export interface SavedPoint {
@@ -81,10 +81,18 @@ export async function savePositionPoint(
 
   // 3) Filtros de historial
   if (lastSaved) {
-    // Anti-salto: ignorar desplazamientos imposibles
-    if (dtMs < JUMP_MS && distKm > JUMP_KM) {
-      console.log(`[GPS] Salto ignorado: ${(distKm * 1000).toFixed(0)}m en ${dtMs}ms`);
-      return lastSaved;
+    // Anti-salto basado en velocidad: descarta puntos que impliquen una velocidad
+    // físicamente imposible (>200 km/h), independientemente del tiempo transcurrido.
+    // Esto permite movimiento legítimo en coche sin descartar puntos válidos,
+    // mientras sigue filtrando saltos GPS erróneos (p.e. 800m en 2s = 1440 km/h).
+    // Nota: dtMs puede ser muy pequeño si el SO entrega callbacks muy seguidos;
+    // solo aplicamos el filtro si ha pasado al menos 1s para evitar falsos positivos.
+    if (dtMs >= 1_000) {
+      const speedKmh = (distKm / dtMs) * 3_600_000;
+      if (speedKmh > MAX_SPEED_KMH) {
+        console.log(`[GPS] Salto ignorado: ${(distKm * 1000).toFixed(0)}m en ${dtMs}ms (${speedKmh.toFixed(0)} km/h)`);
+        return lastSaved;
+      }
     }
 
     // Cadencia: no guardar si no ha pasado suficiente tiempo o distancia
