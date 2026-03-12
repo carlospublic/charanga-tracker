@@ -55,6 +55,7 @@ export function AboutModal({ visible, onClose }: Props) {
 
             <Text style={styles.modalSection}>Créditos</Text>
             <Text style={styles.modalText}>Idea y desarrollo: Jesús y Carlos.</Text>
+            <Text style={styles.modalText}>Dedicado a Joaquín.</Text>
             <Text style={styles.modalText}>Contacto: carlos.public@gmail.com</Text>
 
             <Pressable style={[styles.modalClose, { marginTop: 20 }]} onPress={onClose}>
