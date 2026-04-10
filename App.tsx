@@ -12,6 +12,7 @@ import { useNearbyEvents } from "./src/hooks/useNearbyEvents";
 import { useEventPositions } from "./src/hooks/useEventPositions";
 
 import { AboutModal } from "./src/components/AboutModal";
+import { BackgroundLocationDisclosureModal } from "./src/components/BackgroundLocationDisclosureModal";
 import { EventMap } from "./src/components/EventMap";
 import { EmitterPanel } from "./src/components/EmitterPanel";
 import { ReceiverPanel } from "./src/components/ReceiverPanel";
@@ -36,10 +37,17 @@ export default function App() {
 
   const { status: versionStatus, minVersion } = useMinVersion();
   const { authReady, authError, retryAuth } = useAuthAnonymous();
-  const { ensureForegroundPermission, ensureBackgroundPermission } = useLocationPermission();
+  const {
+    ensureForegroundPermission,
+    ensureBackgroundPermission,
+    showingDisclosure,
+    requestDisclosureAcceptance,
+    onDisclosureAccept,
+    onDisclosureCancel,
+  } = useLocationPermission();
   const { eventData, setEventData, subscribe, unsubscribe } = useEventSubscription();
 
-  const emitter = useEmitter({ ensureForegroundPermission, ensureBackgroundPermission });
+  const emitter = useEmitter({ ensureForegroundPermission, ensureBackgroundPermission, requestDisclosureAcceptance });
   const receiver = useReceiver({ subscribe, unsubscribe });
   const nearby = useNearbyEvents({ ensureForegroundPermission });
 
@@ -246,6 +254,11 @@ export default function App() {
       </KeyboardAvoidingView>
 
       <AboutModal visible={showAbout} onClose={() => setShowAbout(false)} />
+      <BackgroundLocationDisclosureModal
+        visible={showingDisclosure}
+        onAccept={onDisclosureAccept}
+        onCancel={onDisclosureCancel}
+      />
     </SafeAreaView>
   );
 }

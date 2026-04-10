@@ -13,8 +13,10 @@ import { savePositionPoint, type SavedPoint } from "../location/savePositionPoin
 export function useEmitter(opts: {
   ensureForegroundPermission: () => Promise<boolean>;
   ensureBackgroundPermission: () => Promise<boolean>;
+  /** Muestra el modal de aviso destacado y devuelve true si el usuario acepta */
+  requestDisclosureAcceptance: () => Promise<boolean>;
 }) {
-  const { ensureForegroundPermission, ensureBackgroundPermission } = opts;
+  const { ensureForegroundPermission, ensureBackgroundPermission, requestDisclosureAcceptance } = opts;
 
   const [eventId, setEventId] = useState<string | null>(null);
   const [eventName, setEventName] = useState<string>("");
@@ -54,6 +56,11 @@ export function useEmitter(opts: {
     async (forEventId: string) => {
       const fgOk = await ensureForegroundPermission();
       if (!fgOk) return false;
+
+      // Aviso destacado obligatorio (Google Play policy) antes de pedir
+      // el permiso ACCESS_BACKGROUND_LOCATION
+      const disclosureAccepted = await requestDisclosureAcceptance();
+      if (!disclosureAccepted) return false;
 
       const bgOk = await ensureBackgroundPermission();
 
@@ -140,7 +147,7 @@ export function useEmitter(opts: {
         }
       }
     },
-    [ensureForegroundPermission, ensureBackgroundPermission, locationOptions]
+    [ensureForegroundPermission, ensureBackgroundPermission, requestDisclosureAcceptance, locationOptions]
   );
 
   const stopEmitting = useCallback(async (updateFirestoreId?: string) => {

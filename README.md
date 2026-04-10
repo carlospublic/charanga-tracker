@@ -124,9 +124,10 @@ eas secret:list
 1. Selecciona la pestaña **Emisor**
 2. Escribe un nombre para el evento (p. ej. `Charanga San Mateo`)
 3. Pulsa **🎺 Crear evento (y emitir)**
-4. Acepta los permisos de ubicación — si aceptas *"Ubicación siempre"*, la app emitirá aunque la pantalla esté bloqueada. **Evita "Solo una vez"**: ese permiso expira al salir de la app y bloqueará la creación del evento en la siguiente sesión
-5. Usa **⏸ Pausar emisión** / **▶ Reanudar emisión** para controlar la emisión sin finalizar el evento
-6. Cuando termines, pulsa **🏁 Finalizar evento**
+4. La app mostrará un **aviso de uso de ubicación en segundo plano** — léelo y pulsa **Entendido, continuar**
+5. Acepta los permisos de ubicación — si aceptas *"Ubicación siempre"*, la app emitirá aunque la pantalla esté bloqueada. **Evita "Solo una vez"**: ese permiso expira al salir de la app y bloqueará la creación del evento en la siguiente sesión
+6. Usa **⏸ Pausar emisión** / **▶ Reanudar emisión** para controlar la emisión sin finalizar el evento
+7. Cuando termines, pulsa **🏁 Finalizar evento**
 
 ### Modo Receptor
 1. Selecciona la pestaña **Receptor**
@@ -157,17 +158,18 @@ eas secret:list
 │   │   ├── emissionStore.ts       # Estado persistente de emisión (eventId, sessionId, sessionStartedAt)
 │   │   └── locationTask.ts        # Tarea GPS en segundo plano con validación de sesión
 │   ├── components/
-│   │   ├── AboutModal.tsx         # Modal de información y créditos
-│   │   ├── EmitterPanel.tsx       # Panel de crear / pausar / finalizar evento
-│   │   ├── EventMap.tsx           # Mapa con marcador, polyline y botón recentrar
-│   │   ├── ReceiverPanel.tsx      # Panel de búsqueda y seguimiento de evento
-│   │   └── UpdateRequired.tsx     # Pantalla de bloqueo por versión obsoleta
+│   │   ├── AboutModal.tsx                        # Modal de información y créditos
+│   │   ├── BackgroundLocationDisclosureModal.tsx  # Aviso destacado de ubicación en BG (obligatorio Google Play)
+│   │   ├── EmitterPanel.tsx                      # Panel de crear / pausar / finalizar evento
+│   │   ├── EventMap.tsx                          # Mapa con marcador, polyline y botón recentrar
+│   │   ├── ReceiverPanel.tsx                     # Panel de búsqueda y seguimiento de evento
+│   │   └── UpdateRequired.tsx                    # Pantalla de bloqueo por versión obsoleta
 │   ├── hooks/
 │   │   ├── useAuthAnonymous.ts    # Login anónimo + estado authReady
 │   │   ├── useEventPositions.ts   # Listener del historial de posiciones (últimos 300 pts)
 │   │   ├── useEventSubscription.ts# Listener en tiempo real del documento de evento
 │   │   ├── useEmitter.ts          # Lógica completa de creación y emisión
-│   │   ├── useLocationPermission.ts  # Gestión de permisos FG/BG con caché
+│   │   ├── useLocationPermission.ts  # Gestión de permisos FG/BG con caché + disclosure
 │   │   ├── useMinVersion.ts       # Comprueba versión mínima requerida contra Firestore
 │   │   ├── useNearbyEvents.ts     # Búsqueda por geohash en radio de 3 km
 │   │   └── useReceiver.ts         # Búsqueda por nombre y seguimiento de evento
@@ -238,6 +240,17 @@ La cadencia está optimizada para minimizar escrituras manteniendo precisión ta
 | `MAX_SPEED_KMH` | 200 km/h | Velocidad máxima considerada real — descarta saltos GPS erróneos |
 
 Resultado: **~4 escrituras/min** máximo por evento activo (frente a ~12 sin throttle).
+
+### Aviso destacado de ubicación en segundo plano
+
+Google Play exige mostrar un aviso explícito al usuario antes de solicitar el permiso `ACCESS_BACKGROUND_LOCATION`. El flujo implementado es:
+
+1. Se pide permiso de ubicación en primer plano (diálogo del sistema)
+2. Si se concede, se muestra `BackgroundLocationDisclosureModal` — un sheet que explica qué datos se recogen, para qué y cómo revocar el permiso
+3. Solo si el usuario pulsa **Entendido, continuar** se solicita el permiso de ubicación en segundo plano (diálogo del sistema)
+4. Si el usuario cancela el aviso, la creación del evento se aborta sin pedir el permiso BG
+
+El modal se gestiona a través de `useLocationPermission` mediante una promesa suspendida (`requestDisclosureAcceptance`) que resuelve cuando el usuario acepta o cancela.
 
 ### Emisión en segundo plano
 
