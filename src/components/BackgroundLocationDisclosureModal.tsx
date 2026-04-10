@@ -45,11 +45,13 @@ export function BackgroundLocationDisclosureModal({ visible, onAccept, onCancel 
             <Text style={styles.modalTitle}>📍 Uso de ubicación en segundo plano</Text>
 
             <Text style={styles.modalText}>
-              Para que otros miembros del grupo puedan seguirte en el mapa,{" "}
               <Text style={styles.modalBold}>
-                esta aplicación necesita acceder a tu ubicación incluso cuando está en segundo plano
-              </Text>{" "}
-              (pantalla apagada o usando otra app).
+                Esta app recopila datos de ubicación incluso cuando está en segundo plano o no está en uso.
+              </Text>
+            </Text>
+
+            <Text style={styles.modalText}>
+              Esto permite que otros miembros del grupo puedan seguirte en el mapa aunque la pantalla esté apagada o estés usando otra app.
             </Text>
 
             <Text style={styles.modalSection}>¿Qué datos se recogen?</Text>
